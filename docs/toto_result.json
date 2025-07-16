@@ -1,0 +1,50 @@
+[
+  {
+    "date": "2",
+    "draw_number": "8",
+    "winning_numbers": [
+      "19"
+    ],
+    "additional_number": "29"
+  },
+  {
+    "date": "12",
+    "draw_number": "21",
+    "winning_numbers": [
+      "26"
+    ],
+    "additional_number": "27"
+  },
+  {
+    "date": "10",
+    "draw_number": "15",
+    "winning_numbers": [
+      "17"
+    ],
+    "additional_number": "33"
+  },
+  {
+    "date": "6",
+    "draw_number": "15",
+    "winning_numbers": [
+      "16"
+    ],
+    "additional_number": "17"
+  },
+  {
+    "date": "11",
+    "draw_number": "27",
+    "winning_numbers": [
+      "31"
+    ],
+    "additional_number": "33"
+  },
+  {
+    "date": "10",
+    "draw_number": "26",
+    "winning_numbers": [
+      "28"
+    ],
+    "additional_number": "35"
+  }
+]
