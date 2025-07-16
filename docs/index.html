@@ -12,7 +12,17 @@
     th, td { padding: 0.6rem; border: 1px solid #ccc; text-align: center; }
     th { background-color: #f0f0f0; }
     .section { margin-top: 2.5rem; }
-    .list-inline li { margin: 0.4rem 0; font-size: 1.1rem; }
+    .pill {
+      display: inline-block;
+      padding: 8px 12px;
+      margin: 4px;
+      background-color: #e3f2fd;
+      border-radius: 16px;
+      font-size: 1rem;
+      border: 1px solid #90caf9;
+    }
+    .hot-title { color: #d32f2f; font-weight: bold; }
+    .cold-title { color: #1565c0; font-weight: bold; }
     #totoGenOutput { font-size: 1.3rem; margin-top: 1rem; color: #444; }
   </style>
 </head>
@@ -51,11 +61,12 @@
   </div>
 
   <div class="section">
-    <h2>🔥 Hot Numbers (Most Drawn)</h2>
-    <ul id="hotNumbers" class="list-inline"></ul>
+    <h2 class="hot-title">🔥 Hot Numbers (Most Drawn)</h2>
+    <p id="drawCount"></p>
+    <div id="hotNumbers"></div>
 
-    <h2>❄️ Cold Numbers (Least Drawn)</h2>
-    <ul id="coldNumbers" class="list-inline"></ul>
+    <h2 class="cold-title">❄️ Cold Numbers (Least Drawn)</h2>
+    <div id="coldNumbers"></div>
   </div>
 
   <script>
@@ -151,33 +162,32 @@
 
     function updateHotCold(data) {
       const frequency = {};
-
-      for (let i = 1; i <= 49; i++) {
-        frequency[i] = 0;
-      }
+      for (let i = 1; i <= 49; i++) frequency[i] = 0;
 
       data.forEach(draw => {
         draw.winning_numbers.forEach(num => {
           const n = parseInt(num, 10);
           if (!isNaN(n)) frequency[n]++;
         });
-        // To include bonus numbers in the stats, uncomment:
-        // const bonus = parseInt(draw.additional_number, 10);
-        // if (!isNaN(bonus)) frequency[bonus]++;
       });
 
-      const sorted = Object.entries(frequency)
-        .map(([num, count]) => ({ number: num, count: count }))
-        .sort((a, b) => b.count - a.count);
+      const entries = Object.entries(frequency)
+        .map(([num, count]) => ({ number: num, count: count }));
 
-      const hotList = sorted.filter(x => x.count > 0).slice(0, 10);
-      const coldList = sorted.slice().reverse().filter(x => x.count > 0).slice(0, 10);
+      const hot = [...entries].filter(x => x.count > 0).sort((a, b) => b.count - a.count).slice(0, 10);
+      const cold = [...entries].filter(x => x.count > 0).sort((a, b) => a.count - b.count).slice(0, 10);
 
-      const formatList = list =>
-        list.map((entry, i) => `<li>#${i + 1}: ${entry.number} → ${entry.count} draw(s)</li>`).join('');
+      const hotHTML = hot.map((e, i) =>
+        `<span class="pill">#${i + 1}: ${e.number} (${e.count})</span>`
+      ).join('');
 
-      document.getElementById('hotNumbers').innerHTML = formatList(hotList);
-      document.getElementById('coldNumbers').innerHTML = formatList(coldList);
+      const coldHTML = cold.map((e, i) =>
+        `<span class="pill">#${i + 1}: ${e.number} (${e.count})</span>`
+      ).join('');
+
+      document.getElementById('hotNumbers').innerHTML = hotHTML;
+      document.getElementById('coldNumbers').innerHTML = coldHTML;
+      document.getElementById('drawCount').textContent = `Results based on ${data.length} draw(s)`;
     }
   </script>
 
