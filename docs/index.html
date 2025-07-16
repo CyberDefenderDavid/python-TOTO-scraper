@@ -56,15 +56,26 @@
       visibility: visible;
       opacity: 1;
     }
-    .prize-table {
-      margin: 0.5rem 0;
-      display: none;
+    .toggle-section {
+      margin-top: 1rem;
     }
     .toggle-btn {
       cursor: pointer;
-      font-size: 0.9rem;
       color: #007BFF;
       text-decoration: underline;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+    .hidden {
+      display: none;
+    }
+    footer {
+      margin-top: 4rem;
+      font-size: 0.9rem;
+      color: #666;
+      border-top: 1px solid #ccc;
+      padding-top: 1rem;
     }
   </style>
 </head>
@@ -91,7 +102,6 @@
         <th>Draw Number</th>
         <th>Winning Numbers</th>
         <th>Additional Number</th>
-        <th>Group Prizes</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -112,20 +122,26 @@
       <option value="yes">Yes</option>
     </select>
 
-    <label for="hotCount">How many hot numbers to show:</label>
-    <select id="hotCount">
-      <option value="6" selected>6</option>
-      <option value="7">7</option>
-      <option value="8">8</option>
-      <option value="all">All</option>
-    </select>
-
     <p id="drawCount"></p>
     <div id="hotNumbers"></div>
 
     <h2 class="cold-title">❄️ Cold Numbers (Least Drawn)</h2>
     <div id="coldNumbers"></div>
   </div>
+
+  <div class="section toggle-section">
+    <span class="toggle-btn" onclick="toggleAllDraws()">Show All Numbers Based on Draw</span>
+    <div id="allDraws" class="hidden">
+      <ul id="allDrawList"></ul>
+    </div>
+  </div>
+
+  <footer>
+    <p>This site is an unofficial viewer of Singapore TOTO results.<br>
+    Data is sourced from Singapore Pools and refreshed daily.<br>
+    We are not affiliated with or endorsed by Singapore Pools.<br>
+    This project is for learning GitHub Actions and workflow automation.</p>
+  </footer>
 
   <script>
     let allData = [];
@@ -139,6 +155,7 @@
         renderTable(data);
         currentFiltered = data;
         updateHotCold(data);
+        renderAllDraws(data);
       })
       .catch(error => {
         console.error("Error loading TOTO results:", error);
@@ -172,7 +189,6 @@
       drawFilter.addEventListener('change', applyFilters);
       dateFilter.addEventListener('change', applyFilters);
       document.getElementById('bonusToggle').addEventListener('change', () => updateHotCold(currentFiltered));
-      document.getElementById('hotCount').addEventListener('change', () => updateHotCold(currentFiltered));
     }
 
     function applyFilters() {
@@ -192,47 +208,22 @@
       currentFiltered = filtered;
       renderTable(filtered);
       updateHotCold(filtered);
+      renderAllDraws(filtered);
     }
 
     function renderTable(data) {
       const tbody = document.querySelector('#totoTable tbody');
       tbody.innerHTML = "";
-      data.forEach((result, i) => {
+      data.forEach(result => {
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${result.date}</td>
           <td>${result.draw_number}</td>
           <td>${result.winning_numbers.join(', ')}</td>
           <td>${result.additional_number}</td>
-          <td>
-            <span class="toggle-btn" onclick="togglePrizeTable(${i})">Show</span>
-            <table class="prize-table" id="prizes-${i}">
-              <thead>
-                <tr><th>Group</th><th>Amount</th><th>Shares</th></tr>
-              </thead>
-              <tbody>
-                ${(result.group_prizes || []).map(p => `
-                  <tr>
-                    <td>${p.group}</td>
-                    <td>${p.amount}</td>
-                    <td>${p.shares}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </td>
         `;
         tbody.appendChild(row);
       });
-    }
-
-    function togglePrizeTable(index) {
-      const table = document.getElementById(`prizes-${index}`);
-      if (table.style.display === "table") {
-        table.style.display = "none";
-      } else {
-        table.style.display = "table";
-      }
     }
 
     function generateToto() {
@@ -247,7 +238,6 @@
 
     function updateHotCold(data) {
       const includeBonus = document.getElementById('bonusToggle').value === "yes";
-      const hotCountSetting = document.getElementById('hotCount').value;
 
       const frequency = {};
       const appearances = {};
@@ -286,13 +276,7 @@
       const sortedAsc = [...entries].sort((a, b) => a.count - b.count);
       const avgCount = data.length / 49;
 
-      let hot = [];
-      if (hotCountSetting === "all") {
-        hot = sortedDesc.filter(x => x.count > avgCount);
-      } else {
-        hot = sortedDesc.slice(0, parseInt(hotCountSetting));
-      }
-
+      const hot = sortedDesc.filter(x => x.count > avgCount);
       const bottomCount = sortedAsc[0]?.count || 0;
       const cold = sortedAsc.filter(x =>
         x.count === bottomCount && !hot.find(h => h.number === x.number)
@@ -301,15 +285,30 @@
       const format = (list, type) =>
         list.map(e =>
           `<span class="pill ${type}">
-             <div>${e.count} draw${e.count > 1 ? "s" : ""}</div>
-             <div>"${e.number}"</div>
-             <span class="tooltip">${e.dates.join('\n')}</span>
+            <div>${e.count} draw${e.count > 1 ? "s" : ""}</div>
+            <div>"${e.number}"</div>
+            <span class="tooltip">${e.dates.join('\n')}</span>
           </span>`
         ).join('');
 
       document.getElementById('hotNumbers').innerHTML = format(hot, "hot");
       document.getElementById('coldNumbers').innerHTML = format(cold, "cold");
       document.getElementById('drawCount').textContent = `Results based on ${data.length} draw(s)`;
+    }
+
+    function toggleAllDraws() {
+      const section = document.getElementById("allDraws");
+      section.classList.toggle("hidden");
+    }
+
+    function renderAllDraws(data) {
+      const ul = document.getElementById("allDrawList");
+      ul.innerHTML = "";
+      data.forEach(draw => {
+        const li = document.createElement("li");
+        li.textContent = `${draw.date} — Draw ${draw.draw_number} → ${draw.winning_numbers.join(', ')} + ${draw.additional_number}`;
+        ul.appendChild(li);
+      });
     }
   </script>
 
