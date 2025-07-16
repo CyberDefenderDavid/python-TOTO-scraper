@@ -1,6 +1,9 @@
+/* Base styles */
 body {
   font-family: sans-serif;
   margin: 2rem;
+  background-color: #ffffff;
+  color: #000;
 }
 
 h1 {
@@ -116,4 +119,62 @@ footer {
   color: #666;
   border-top: 1px solid #ccc;
   padding-top: 1rem;
+}
+
+/* All Numbers Based on Draw Grid */
+.all-draw-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  padding-top: 0.5rem;
+}
+
+.draw-panel {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  font-size: 1rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #e0e0e0;
+  }
+
+  th {
+    background-color: #1e1e1e;
+    color: #fff;
+  }
+
+  td {
+    background-color: #1a1a1a;
+  }
+
+  .pill.hot {
+    background-color: #3c0d0d;
+    border-color: #e57373;
+    color: #ff8a80;
+  }
+
+  .pill.cold {
+    background-color: #0d2a3c;
+    border-color: #64b5f6;
+    color: #90caf9;
+  }
+
+  .draw-panel {
+    background-color: #1e1e1e;
+    border-color: #444;
+    color: #eee;
+  }
+
+  footer {
+    border-top-color: #333;
+    color: #999;
+  }
 }
