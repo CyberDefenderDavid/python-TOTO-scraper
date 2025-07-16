@@ -160,8 +160,8 @@ function toggleAllDraws() {
 }
 
 function renderAllDrawCounts(data) {
-  const ul = document.getElementById("allDrawList");
-  ul.innerHTML = "";
+  const container = document.getElementById("allDrawList");
+  container.innerHTML = "";
 
   const freq = {};
   for (let i = 1; i <= 49; i++) freq[i] = 0;
@@ -180,8 +180,9 @@ function renderAllDrawCounts(data) {
   });
 
   for (let i = 1; i <= 49; i++) {
-    const li = document.createElement("li");
-    li.textContent = `${i} → ${freq[i]} time${freq[i] !== 1 ? "s" : ""}`;
-    ul.appendChild(li);
+    const box = document.createElement("div");
+    box.className = "draw-panel";
+    box.textContent = `${i} → ${freq[i]} time${freq[i] !== 1 ? "s" : ""}`;
+    container.appendChild(box);
   }
 }
