@@ -16,12 +16,21 @@
       display: inline-block;
       padding: 8px 12px;
       margin: 4px;
-      background-color: #e3f2fd;
       border-radius: 16px;
       font-size: 1rem;
-      border: 1px solid #90caf9;
       text-align: center;
       line-height: 1.3;
+      border: 1px solid;
+    }
+    .pill.hot {
+      background-color: #ffebee;
+      border-color: #f44336;
+      color: #b71c1c;
+    }
+    .pill.cold {
+      background-color: #e3f2fd;
+      border-color: #2196f3;
+      color: #0d47a1;
     }
     .hot-title { color: #d32f2f; font-weight: bold; }
     .cold-title { color: #1565c0; font-weight: bold; }
@@ -207,26 +216,30 @@
       const sortedDesc = [...entries].sort((a, b) => b.count - a.count);
       const sortedAsc = [...entries].sort((a, b) => a.count - b.count);
 
+      const avgCount = data.length / 49;
+
       let hot = [];
       if (hotCountSetting === "all") {
-        hot = sortedDesc;
+        hot = sortedDesc.filter(x => x.count > avgCount);
       } else {
         hot = sortedDesc.slice(0, parseInt(hotCountSetting));
       }
 
       const bottomCount = sortedAsc[0]?.count || 0;
-      const cold = sortedAsc.filter(x => x.count === bottomCount);
+      const cold = sortedAsc.filter(x =>
+        x.count === bottomCount && !hot.find(h => h.number === x.number)
+      );
 
-      const format = list =>
+      const format = (list, type) =>
         list.map(e =>
-          `<span class="pill">
-             <div>${e.count} draw${e.count > 1 ? "s" : ""}</div>
-             <div>"${e.number}"</div>
+          `<span class="pill ${type}">
+            <div>${e.count} draw${e.count > 1 ? "s" : ""}</div>
+            <div>"${e.number}"</div>
           </span>`
         ).join('');
 
-      document.getElementById('hotNumbers').innerHTML = format(hot);
-      document.getElementById('coldNumbers').innerHTML = format(cold);
+      document.getElementById('hotNumbers').innerHTML = format(hot, "hot");
+      document.getElementById('coldNumbers').innerHTML = format(cold, "cold");
       document.getElementById('drawCount').textContent = `Results based on ${data.length} draw(s)`;
     }
   </script>
