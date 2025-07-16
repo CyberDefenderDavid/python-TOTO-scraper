@@ -62,6 +62,10 @@
 
   <div class="section">
     <h2 class="hot-title">🔥 Hot Numbers (Most Drawn)</h2>
+    <label>
+      <input type="checkbox" id="includeBonus" checked>
+      Include Additional Number in stats
+    </label>
     <p id="drawCount"></p>
     <div id="hotNumbers"></div>
 
@@ -111,7 +115,10 @@
 
       drawFilter.addEventListener('change', applyFilters);
       dateFilter.addEventListener('change', applyFilters);
+      document.getElementById('includeBonus').addEventListener('change', () => updateHotCold(currentFiltered));
     }
+
+    let currentFiltered = [];
 
     function applyFilters() {
       const draw = document.getElementById('drawFilter').value;
@@ -127,6 +134,7 @@
         filtered = filtered.filter(r => r.date === date);
       }
 
+      currentFiltered = filtered;
       renderTable(filtered);
       updateHotCold(filtered);
     }
@@ -161,6 +169,8 @@
     }
 
     function updateHotCold(data) {
+      const includeBonus = document.getElementById('includeBonus').checked;
+
       const frequency = {};
       for (let i = 1; i <= 49; i++) frequency[i] = 0;
 
@@ -169,24 +179,29 @@
           const n = parseInt(num, 10);
           if (!isNaN(n)) frequency[n]++;
         });
+        if (includeBonus) {
+          const bonus = parseInt(draw.additional_number, 10);
+          if (!isNaN(bonus)) frequency[bonus]++;
+        }
       });
 
       const entries = Object.entries(frequency)
         .map(([num, count]) => ({ number: num, count: count }));
 
-      const hot = [...entries].filter(x => x.count > 0).sort((a, b) => b.count - a.count).slice(0, 10);
-      const cold = [...entries].filter(x => x.count > 0).sort((a, b) => a.count - b.count).slice(0, 10);
+      const sortedDesc = [...entries].filter(x => x.count > 0).sort((a, b) => b.count - a.count);
+      const sortedAsc = [...entries].filter(x => x.count > 0).sort((a, b) => a.count - b.count);
 
-      const hotHTML = hot.map((e, i) =>
-        `<span class="pill">#${i + 1}: ${e.number} (${e.count})</span>`
-      ).join('');
+      const topCount = sortedDesc[0]?.count || 0;
+      const bottomCount = sortedAsc[0]?.count || 0;
 
-      const coldHTML = cold.map((e, i) =>
-        `<span class="pill">#${i + 1}: ${e.number} (${e.count})</span>`
-      ).join('');
+      const hot = sortedDesc.filter(x => x.count === topCount);
+      const cold = sortedAsc.filter(x => x.count === bottomCount);
 
-      document.getElementById('hotNumbers').innerHTML = hotHTML;
-      document.getElementById('coldNumbers').innerHTML = coldHTML;
+      const format = list =>
+        list.map((e, i) => `<span class="pill">#${i + 1}: ${e.number} (${e.count})</span>`).join('');
+
+      document.getElementById('hotNumbers').innerHTML = format(hot);
+      document.getElementById('coldNumbers').innerHTML = format(cold);
       document.getElementById('drawCount').textContent = `Results based on ${data.length} draw(s)`;
     }
   </script>
