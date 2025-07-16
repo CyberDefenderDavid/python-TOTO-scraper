@@ -7,7 +7,7 @@
     body { font-family: sans-serif; margin: 2rem; }
     h1 { color: #2e7d32; }
     label { margin-right: 0.5rem; }
-    select, input[type="date"] { margin-right: 1rem; padding: 0.3rem; }
+    select { margin-right: 1rem; padding: 0.3rem; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     th, td { padding: 0.6rem; border: 1px solid #ccc; text-align: center; }
     th { background-color: #f0f0f0; }
@@ -25,10 +25,10 @@
       <option value="all">All</option>
     </select>
 
-    <label for="filterDate">Filter by Date:</label>
-    <input type="date" id="filterDate">
-
-    <button onclick="applyFilters()">Apply Filters</button>
+    <label for="dateFilter">Filter by Date:</label>
+    <select id="dateFilter">
+      <option value="all">All</option>
+    </select>
   </div>
 
   <table id="totoTable">
@@ -56,15 +56,22 @@
       .then(response => response.json())
       .then(data => {
         allData = data;
-        populateDropdown(data);
+        populateDropdowns(data);
         renderTable(data);
       })
       .catch(error => {
         console.error("Error loading TOTO results:", error);
       });
 
-    function populateDropdown(data) {
-      const drawSet = new Set(data.map(r => r.draw_number));
+    function populateDropdowns(data) {
+      const drawSet = new Set();
+      const dateSet = new Set();
+
+      data.forEach(r => {
+        drawSet.add(r.draw_number);
+        dateSet.add(r.date);
+      });
+
       const drawFilter = document.getElementById('drawFilter');
       [...drawSet].sort().reverse().forEach(draw => {
         const option = document.createElement('option');
@@ -72,11 +79,22 @@
         option.textContent = draw;
         drawFilter.appendChild(option);
       });
+
+      const dateFilter = document.getElementById('dateFilter');
+      [...dateSet].sort((a, b) => new Date(b) - new Date(a)).forEach(date => {
+        const option = document.createElement('option');
+        option.value = date;
+        option.textContent = date;
+        dateFilter.appendChild(option);
+      });
+
+      drawFilter.addEventListener('change', applyFilters);
+      dateFilter.addEventListener('change', applyFilters);
     }
 
     function applyFilters() {
       const draw = document.getElementById('drawFilter').value;
-      const selectedDate = document.getElementById('filterDate').value;
+      const date = document.getElementById('dateFilter').value;
 
       let filtered = allData;
 
@@ -84,9 +102,8 @@
         filtered = filtered.filter(r => r.draw_number === draw);
       }
 
-      if (selectedDate) {
-        const selected = new Date(selectedDate).toDateString();
-        filtered = filtered.filter(r => new Date(r.date).toDateString() === selected);
+      if (date !== "all") {
+        filtered = filtered.filter(r => r.date === date);
       }
 
       renderTable(filtered);
