@@ -207,8 +207,7 @@
 
       let hot = [];
       if (hotCountSetting === "all") {
-        const topCount = sortedDesc[0]?.count || 0;
-        hot = sortedDesc.filter(x => x.count === topCount);
+        hot = sortedDesc;
       } else {
         hot = sortedDesc.slice(0, parseInt(hotCountSetting));
       }
