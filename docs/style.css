@@ -4,6 +4,7 @@ body {
   margin: 2rem;
   background-color: #ffffff;
   color: #000000;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 h1 {
@@ -39,6 +40,23 @@ th {
   margin-top: 2.5rem;
 }
 
+button {
+  cursor: pointer;
+}
+
+/* Toggle dark mode button */
+#darkModeToggle {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  font-size: 0.9rem;
+  background-color: #eee;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+/* Pill styles */
 .pill {
   display: inline-block;
   padding: 8px 12px;
@@ -113,21 +131,17 @@ th {
   display: none;
 }
 
-.all-draw-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 10px;
-  padding-top: 1rem;
+/* Table for all numbers based on draw */
+#allDrawTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
 }
 
-.draw-panel {
-  background-color: #f5f5f5;
+#allDrawTable th, #allDrawTable td {
   border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
+  padding: 8px;
   text-align: center;
-  font-size: 1rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 /* Prize table toggle styles */
@@ -157,49 +171,48 @@ th {
   text-decoration: underline;
 }
 
-/* Dark Mode */
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #121212;
-    color: #e0e0e0;
-  }
+/* Dark mode overrides */
+body.dark {
+  background-color: #121212;
+  color: #e0e0e0;
+}
 
-  th {
-    background-color: #1e1e1e;
-    color: #ffffff;
-  }
+body.dark th {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
 
-  td {
-    background-color: #1a1a1a;
-  }
+body.dark td {
+  background-color: #1a1a1a;
+  color: #dddddd;
+}
 
-  .pill.hot {
-    background-color: #3c0d0d;
-    border-color: #e57373;
-    color: #ff8a80;
-  }
+body.dark #darkModeToggle {
+  background-color: #333;
+  color: #eee;
+  border-color: #666;
+}
 
-  .pill.cold {
-    background-color: #0d2a3c;
-    border-color: #64b5f6;
-    color: #90caf9;
-  }
+body.dark .pill.hot {
+  background-color: #3c0d0d;
+  border-color: #e57373;
+  color: #ff8a80;
+}
 
-  .draw-panel {
-    background-color: #222;
-    border-color: #555;
-    color: #eee;
-  }
+body.dark .pill.cold {
+  background-color: #0d2a3c;
+  border-color: #64b5f6;
+  color: #90caf9;
+}
 
-  .prize-table th {
-    background-color: #333;
-  }
+body.dark .toggle-btn {
+  color: #64b5f6;
+}
 
-  .prize-table td {
-    background-color: #222;
-  }
+body.dark .prize-table th {
+  background-color: #333;
+}
 
-  .toggle-btn {
-    color: #64b5f6;
-  }
+body.dark .prize-table td {
+  background-color: #222;
 }
