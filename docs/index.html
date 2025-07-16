@@ -207,7 +207,8 @@
 
       let hot = [];
       if (hotCountSetting === "all") {
-        hot = sortedDesc;
+        const topCount = sortedDesc[0]?.count || 0;
+        hot = sortedDesc.filter(x => x.count === topCount);
       } else {
         hot = sortedDesc.slice(0, parseInt(hotCountSetting));
       }
@@ -216,7 +217,7 @@
       const cold = sortedAsc.filter(x => x.count === bottomCount);
 
       const format = list =>
-        list.map((e, i) => `<span class="pill">#${i + 1}: ${e.number} (${e.count})</span>`).join('');
+        list.map(e => `<span class="pill">${e.number} ▸ ${e.count} draw${e.count > 1 ? "s" : ""}</span>`).join('');
 
       document.getElementById('hotNumbers').innerHTML = format(hot);
       document.getElementById('coldNumbers').innerHTML = format(cold);
