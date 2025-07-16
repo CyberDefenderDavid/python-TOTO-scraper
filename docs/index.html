@@ -21,6 +21,7 @@
       text-align: center;
       line-height: 1.3;
       border: 1px solid;
+      position: relative;
     }
     .pill.hot {
       background-color: #ffebee;
@@ -34,7 +35,37 @@
     }
     .hot-title { color: #d32f2f; font-weight: bold; }
     .cold-title { color: #1565c0; font-weight: bold; }
-    #totoGenOutput { font-size: 1.3rem; margin-top: 1rem; color: #444; }
+    .tooltip {
+      visibility: hidden;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 4px;
+      padding: 6px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.9rem;
+      white-space: pre-line;
+    }
+    .pill:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+    .prize-table {
+      margin: 0.5rem 0;
+      display: none;
+    }
+    .toggle-btn {
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #007BFF;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -60,6 +91,7 @@
         <th>Draw Number</th>
         <th>Winning Numbers</th>
         <th>Additional Number</th>
+        <th>Group Prizes</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -165,20 +197,42 @@
     function renderTable(data) {
       const tbody = document.querySelector('#totoTable tbody');
       tbody.innerHTML = "";
-      if (data.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='4'>No results found.</td></tr>";
-        return;
-      }
-      data.forEach(result => {
+      data.forEach((result, i) => {
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${result.date}</td>
           <td>${result.draw_number}</td>
           <td>${result.winning_numbers.join(', ')}</td>
           <td>${result.additional_number}</td>
+          <td>
+            <span class="toggle-btn" onclick="togglePrizeTable(${i})">Show</span>
+            <table class="prize-table" id="prizes-${i}">
+              <thead>
+                <tr><th>Group</th><th>Amount</th><th>Shares</th></tr>
+              </thead>
+              <tbody>
+                ${(result.group_prizes || []).map(p => `
+                  <tr>
+                    <td>${p.group}</td>
+                    <td>${p.amount}</td>
+                    <td>${p.shares}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </td>
         `;
         tbody.appendChild(row);
       });
+    }
+
+    function togglePrizeTable(index) {
+      const table = document.getElementById(`prizes-${index}`);
+      if (table.style.display === "table") {
+        table.style.display = "none";
+      } else {
+        table.style.display = "table";
+      }
     }
 
     function generateToto() {
@@ -196,26 +250,40 @@
       const hotCountSetting = document.getElementById('hotCount').value;
 
       const frequency = {};
-      for (let i = 1; i <= 49; i++) frequency[i] = 0;
+      const appearances = {};
+
+      for (let i = 1; i <= 49; i++) {
+        frequency[i] = 0;
+        appearances[i] = [];
+      }
 
       data.forEach(draw => {
         draw.winning_numbers.forEach(num => {
           const n = parseInt(num, 10);
-          if (!isNaN(n)) frequency[n]++;
+          if (!isNaN(n)) {
+            frequency[n]++;
+            appearances[n].push(draw.date);
+          }
         });
         if (includeBonus) {
           const bonus = parseInt(draw.additional_number, 10);
-          if (!isNaN(bonus)) frequency[bonus]++;
+          if (!isNaN(bonus)) {
+            frequency[bonus]++;
+            appearances[bonus].push(draw.date);
+          }
         }
       });
 
       const entries = Object.entries(frequency)
-        .map(([num, count]) => ({ number: num, count: count }))
+        .map(([num, count]) => ({
+          number: num,
+          count: count,
+          dates: appearances[num]
+        }))
         .filter(x => x.count > 0);
 
       const sortedDesc = [...entries].sort((a, b) => b.count - a.count);
       const sortedAsc = [...entries].sort((a, b) => a.count - b.count);
-
       const avgCount = data.length / 49;
 
       let hot = [];
@@ -233,8 +301,9 @@
       const format = (list, type) =>
         list.map(e =>
           `<span class="pill ${type}">
-            <div>${e.count} draw${e.count > 1 ? "s" : ""}</div>
-            <div>"${e.number}"</div>
+             <div>${e.count} draw${e.count > 1 ? "s" : ""}</div>
+             <div>"${e.number}"</div>
+             <span class="tooltip">${e.dates.join('\n')}</span>
           </span>`
         ).join('');
 
