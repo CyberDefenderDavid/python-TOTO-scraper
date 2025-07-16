@@ -3,33 +3,33 @@ from bs4 import BeautifulSoup
 import json
 import os
 
-URL = "https://www.singaporepools.com.sg/DataFileArchive/Lottery/Output/toto_result_top_draws_en.html"
-OUTPUT = "docs/toto_result.json"
+ARCHIVE_URL = "https://www.singaporepools.com.sg/DataFileArchive/Lottery/Output/toto_result_top_draws_en.html"
+OUTPUT_FILE = "docs/toto_result.json"
 
-def parse_toto_page():
-    response = requests.get(URL)
-    response.raise_for_status()
-    soup = BeautifulSoup(response.text, "html.parser")
+def fetch_draws_from_archive():
+    res = requests.get(ARCHIVE_URL)
+    res.raise_for_status()
+    soup = BeautifulSoup(res.text, "html.parser")
 
+    draw_blocks = soup.select("li > div.tables-wrap")
     results = []
 
-    for draw in soup.select("li > div.tables-wrap"):
+    for block in draw_blocks:
         try:
-            date = draw.select_one(".drawDate").get_text(strip=True)
-            draw_number = draw.select_one(".drawNumber").get_text(strip=True).replace("Draw No. ", "")
-            winning_numbers = [td.get_text(strip=True) for td in draw.select("table:nth-of-type(2) tbody td")]
-            additional_number = draw.select_one("table:nth-of-type(3) .additional").get_text(strip=True)
-            jackpot = draw.select_one("table.jackpotPrizeTable .jackpotPrize").get_text(strip=True)
+            date = block.select_one(".drawDate").text.strip()
+            draw_number = block.select_one(".drawNumber").text.strip().replace("Draw No. ", "")
+            winning_numbers = [td.text.strip() for td in block.select("table:nth-of-type(2) tbody td")]
+            additional_number = block.select_one("table:nth-of-type(3) .additional").text.strip()
+            jackpot = block.select_one("table.jackpotPrizeTable .jackpotPrize").text.strip()
 
-            # Parse group prizes
-            prize_rows = draw.select("table.tableWinningShares tbody tr")[1:]  # skip table headers
+            group_rows = block.select("table.tableWinningShares tbody tr")[1:]
             group_prizes = []
-            for row in prize_rows:
+            for row in group_rows:
                 cols = row.find_all("td")
                 if len(cols) == 3:
-                    group = cols[0].get_text(strip=True)
-                    amount = cols[1].get_text(strip=True)
-                    shares = cols[2].get_text(strip=True)
+                    group = cols[0].text.strip()
+                    amount = cols[1].text.strip()
+                    shares = cols[2].text.strip()
                     group_prizes.append({
                         "group": group,
                         "amount": amount,
@@ -46,30 +46,45 @@ def parse_toto_page():
             })
 
         except Exception as e:
-            print(f"[!] Error parsing draw block: {e}")
+            print(f"[!] Error parsing block: {e}")
             continue
 
     return results
 
-def load_existing():
-    if os.path.exists(OUTPUT):
-        with open(OUTPUT, "r") as f:
+def load_existing_results():
+    if os.path.exists(OUTPUT_FILE):
+        with open(OUTPUT_FILE, "r") as f:
             return json.load(f)
     return []
 
 def save_results(data):
-    with open(OUTPUT, "w") as f:
+    with open(OUTPUT_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
 def main():
-    new_results = parse_toto_page()
-    existing_results = load_existing()
+    print("[+] Fetching archive draws...")
+    archive_draws = fetch_draws_from_archive()
+    existing_draws = load_existing_results()
 
-    if not existing_results or new_results[0]["draw_number"] != existing_results[0]["draw_number"]:
-        print("[+] New result detected. Saving...")
-        save_results(new_results)
-    else:
-        print("[=] No new results.")
+    draw_map = {d["draw_number"]: d for d in existing_draws}
+
+    updated = 0
+    added = 0
+
+    for draw in archive_draws:
+        if draw["draw_number"] in draw_map:
+            draw_map[draw["draw_number"]] = draw
+            updated += 1
+        else:
+            draw_map[draw["draw_number"]] = draw
+            added += 1
+
+    combined = list(draw_map.values())
+    combined.sort(key=lambda x: int(x["draw_number"]), reverse=True)
+    save_results(combined)
+
+    print(f"[✓] Updated {updated} draw(s), added {added} new draw(s).")
+    print(f"[✓] Saved to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     main()
