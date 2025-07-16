@@ -12,12 +12,19 @@ def fetch_draws_from_archive():
     soup = BeautifulSoup(res.text, "html.parser")
 
     draw_blocks = soup.select("li > div.tables-wrap")
+    seen_draw_numbers = set()
     results = []
 
     for block in draw_blocks:
         try:
             date = block.select_one(".drawDate").text.strip()
             draw_number = block.select_one(".drawNumber").text.strip().replace("Draw No. ", "")
+
+            if draw_number in seen_draw_numbers:
+                print(f"[!] Skipping duplicate draw number in archive: {draw_number}")
+                continue
+            seen_draw_numbers.add(draw_number)
+
             winning_numbers = [td.text.strip() for td in block.select("table:nth-of-type(2) tbody td")]
             additional_number = block.select_one("table:nth-of-type(3) .additional").text.strip()
             jackpot = block.select_one("table.jackpotPrizeTable .jackpotPrize").text.strip()
@@ -66,24 +73,24 @@ def main():
     archive_draws = fetch_draws_from_archive()
     existing_draws = load_existing_results()
 
-    draw_map = {d["draw_number"]: d for d in existing_draws}
-
-    updated = 0
+    existing_draw_map = {d["draw_number"]: d for d in existing_draws}
     added = 0
+    skipped = 0
 
     for draw in archive_draws:
-        if draw["draw_number"] in draw_map:
-            draw_map[draw["draw_number"]] = draw
-            updated += 1
+        if draw["draw_number"] in existing_draw_map:
+            print(f"[=] Skipped existing draw: {draw['draw_number']}")
+            skipped += 1
         else:
-            draw_map[draw["draw_number"]] = draw
+            existing_draws.append(draw)
+            print(f"[+] Added new draw: {draw['draw_number']}")
             added += 1
 
-    combined = list(draw_map.values())
-    combined.sort(key=lambda x: int(x["draw_number"]), reverse=True)
-    save_results(combined)
+    # Sort latest draw first
+    existing_draws.sort(key=lambda x: int(x["draw_number"]), reverse=True)
+    save_results(existing_draws)
 
-    print(f"[✓] Updated {updated} draw(s), added {added} new draw(s).")
+    print(f"[✓] Added {added} new draw(s), skipped {skipped} existing.")
     print(f"[✓] Saved to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
