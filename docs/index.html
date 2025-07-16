@@ -122,6 +122,13 @@
       <option value="yes">Yes</option>
     </select>
 
+    <label for="hotCount">How many hot numbers to show:</label>
+    <select id="hotCount">
+      <option value="6" selected>6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+    </select>
+
     <p id="drawCount"></p>
     <div id="hotNumbers"></div>
 
@@ -142,7 +149,6 @@
     We are not affiliated with or endorsed by Singapore Pools.<br>
     This project is for learning GitHub Actions and workflow automation.</p>
   </footer>
-
   <script>
     let allData = [];
     let currentFiltered = [];
@@ -189,6 +195,7 @@
       drawFilter.addEventListener('change', applyFilters);
       dateFilter.addEventListener('change', applyFilters);
       document.getElementById('bonusToggle').addEventListener('change', () => updateHotCold(currentFiltered));
+      document.getElementById('hotCount').addEventListener('change', () => updateHotCold(currentFiltered));
     }
 
     function applyFilters() {
@@ -238,6 +245,7 @@
 
     function updateHotCold(data) {
       const includeBonus = document.getElementById('bonusToggle').value === "yes";
+      const hotCountSetting = parseInt(document.getElementById('hotCount').value);
 
       const frequency = {};
       const appearances = {};
@@ -276,7 +284,7 @@
       const sortedAsc = [...entries].sort((a, b) => a.count - b.count);
       const avgCount = data.length / 49;
 
-      const hot = sortedDesc.filter(x => x.count > avgCount);
+      const hot = sortedDesc.slice(0, hotCountSetting);
       const bottomCount = sortedAsc[0]?.count || 0;
       const cold = sortedAsc.filter(x =>
         x.count === bottomCount && !hot.find(h => h.number === x.number)
@@ -311,6 +319,5 @@
       });
     }
   </script>
-
 </body>
 </html>
