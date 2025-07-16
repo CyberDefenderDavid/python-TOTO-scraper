@@ -1,0 +1,308 @@
+[
+  {
+    "date": "Mon, 14 Jul 2025",
+    "draw_number": "4095",
+    "winning_numbers": [
+      "2",
+      "8",
+      "19",
+      "29",
+      "38",
+      "41"
+    ],
+    "additional_number": "20",
+    "jackpot": "$5,792,345",
+    "group_prizes": [
+      {
+        "group": "Group 1",
+        "amount": "-",
+        "shares": "-"
+      },
+      {
+        "group": "Group 2",
+        "amount": "$67,336",
+        "shares": "9"
+      },
+      {
+        "group": "Group 3",
+        "amount": "$1,478",
+        "shares": "282"
+      },
+      {
+        "group": "Group 4",
+        "amount": "$334",
+        "shares": "681"
+      },
+      {
+        "group": "Group 5",
+        "amount": "$50",
+        "shares": "14,575"
+      },
+      {
+        "group": "Group 6",
+        "amount": "$25",
+        "shares": "20,365"
+      },
+      {
+        "group": "Group 7",
+        "amount": "$10",
+        "shares": "255,601"
+      }
+    ]
+  },
+  {
+    "date": "Thu, 10 Jul 2025",
+    "draw_number": "4094",
+    "winning_numbers": [
+      "12",
+      "21",
+      "26",
+      "27",
+      "35",
+      "44"
+    ],
+    "additional_number": "10",
+    "jackpot": "$2,913,763",
+    "group_prizes": [
+      {
+        "group": "Group 1",
+        "amount": "-",
+        "shares": "-"
+      },
+      {
+        "group": "Group 2",
+        "amount": "$354,259",
+        "shares": "1"
+      },
+      {
+        "group": "Group 3",
+        "amount": "$1,613",
+        "shares": "151"
+      },
+      {
+        "group": "Group 4",
+        "amount": "$409",
+        "shares": "325"
+      },
+      {
+        "group": "Group 5",
+        "amount": "$50",
+        "shares": "6,941"
+      },
+      {
+        "group": "Group 6",
+        "amount": "$25",
+        "shares": "10,924"
+      },
+      {
+        "group": "Group 7",
+        "amount": "$10",
+        "shares": "133,227"
+      }
+    ]
+  },
+  {
+    "date": "Mon, 07 Jul 2025",
+    "draw_number": "4093",
+    "winning_numbers": [
+      "10",
+      "15",
+      "17",
+      "33",
+      "36",
+      "45"
+    ],
+    "additional_number": "34",
+    "jackpot": "$1,231,037",
+    "group_prizes": [
+      {
+        "group": "Group 1",
+        "amount": "-",
+        "shares": "-"
+      },
+      {
+        "group": "Group 2",
+        "amount": "$129,583",
+        "shares": "2"
+      },
+      {
+        "group": "Group 3",
+        "amount": "$2,376",
+        "shares": "75"
+      },
+      {
+        "group": "Group 4",
+        "amount": "$421",
+        "shares": "231"
+      },
+      {
+        "group": "Group 5",
+        "amount": "$50",
+        "shares": "4,717"
+      },
+      {
+        "group": "Group 6",
+        "amount": "$25",
+        "shares": "6,140"
+      },
+      {
+        "group": "Group 7",
+        "amount": "$10",
+        "shares": "90,346"
+      }
+    ]
+  },
+  {
+    "date": "Thu, 03 Jul 2025",
+    "draw_number": "4092",
+    "winning_numbers": [
+      "6",
+      "15",
+      "16",
+      "17",
+      "25",
+      "34"
+    ],
+    "additional_number": "31",
+    "jackpot": "$2,894,419",
+    "group_prizes": [
+      {
+        "group": "Group 1",
+        "amount": "$2,894,419",
+        "shares": "1"
+      },
+      {
+        "group": "Group 2",
+        "amount": "$175,398",
+        "shares": "2"
+      },
+      {
+        "group": "Group 3",
+        "amount": "$1,556",
+        "shares": "155"
+      },
+      {
+        "group": "Group 4",
+        "amount": "$330",
+        "shares": "399"
+      },
+      {
+        "group": "Group 5",
+        "amount": "$50",
+        "shares": "8,257"
+      },
+      {
+        "group": "Group 6",
+        "amount": "$25",
+        "shares": "10,198"
+      },
+      {
+        "group": "Group 7",
+        "amount": "$10",
+        "shares": "150,923"
+      }
+    ]
+  },
+  {
+    "date": "Mon, 30 Jun 2025",
+    "draw_number": "4091",
+    "winning_numbers": [
+      "11",
+      "27",
+      "31",
+      "33",
+      "34",
+      "36"
+    ],
+    "additional_number": "13",
+    "jackpot": "$1,228,144",
+    "group_prizes": [
+      {
+        "group": "Group 1",
+        "amount": "-",
+        "shares": "-"
+      },
+      {
+        "group": "Group 2",
+        "amount": "$129,279",
+        "shares": "2"
+      },
+      {
+        "group": "Group 3",
+        "amount": "$1,814",
+        "shares": "98"
+      },
+      {
+        "group": "Group 4",
+        "amount": "$291",
+        "shares": "334"
+      },
+      {
+        "group": "Group 5",
+        "amount": "$50",
+        "shares": "5,439"
+      },
+      {
+        "group": "Group 6",
+        "amount": "$25",
+        "shares": "8,592"
+      },
+      {
+        "group": "Group 7",
+        "amount": "$10",
+        "shares": "96,224"
+      }
+    ]
+  },
+  {
+    "date": "Thu, 26 Jun 2025",
+    "draw_number": "4090",
+    "winning_numbers": [
+      "10",
+      "26",
+      "28",
+      "35",
+      "37",
+      "46"
+    ],
+    "additional_number": "20",
+    "jackpot": "$2,803,451",
+    "group_prizes": [
+      {
+        "group": "Group 1",
+        "amount": "$2,803,451",
+        "shares": "1"
+      },
+      {
+        "group": "Group 2",
+        "amount": "$85,639",
+        "shares": "4"
+      },
+      {
+        "group": "Group 3",
+        "amount": "$1,900",
+        "shares": "124"
+      },
+      {
+        "group": "Group 4",
+        "amount": "$410",
+        "shares": "314"
+      },
+      {
+        "group": "Group 5",
+        "amount": "$50",
+        "shares": "7,271"
+      },
+      {
+        "group": "Group 6",
+        "amount": "$25",
+        "shares": "9,136"
+      },
+      {
+        "group": "Group 7",
+        "amount": "$10",
+        "shares": "125,256"
+      }
+    ]
+  }
+]
