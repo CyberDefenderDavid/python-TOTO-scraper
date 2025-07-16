@@ -1,183 +1,140 @@
 let allData = [];
-let currentFiltered = [];
 
-fetch('toto_result.json')
-  .then(response => response.json())
+fetch("docs/toto_result.json")
+  .then(res => res.json())
   .then(data => {
     allData = data;
-    populateDropdowns(data);
-    renderTable(data);
-    currentFiltered = data;
-    updateHotCold(data);
-    renderAllDrawCounts(data);
-  })
-  .catch(error => {
-    console.error("Error loading TOTO results:", error);
+    populateFilters(data);
+    applyFilters();
   });
 
-function populateDropdowns(data) {
-  const drawSet = new Set();
-  const dateSet = new Set();
+function populateFilters(data) {
+  const drawSet = new Set(data.map(d => d.draw_number));
+  const dateSet = new Set(data.map(d => d.date));
 
-  data.forEach(r => {
-    drawSet.add(r.draw_number);
-    dateSet.add(r.date);
+  const drawFilter = document.getElementById("drawFilter");
+  const dateFilter = document.getElementById("dateFilter");
+
+  [...drawSet].sort((a, b) => b - a).forEach(draw => {
+    const opt = document.createElement("option");
+    opt.value = draw;
+    opt.textContent = draw;
+    drawFilter.appendChild(opt);
   });
 
-  const drawFilter = document.getElementById('drawFilter');
-  [...drawSet].sort().reverse().forEach(draw => {
-    const option = document.createElement('option');
-    option.value = draw;
-    option.textContent = draw;
-    drawFilter.appendChild(option);
+  [...dateSet].sort().forEach(date => {
+    const opt = document.createElement("option");
+    opt.value = date;
+    opt.textContent = date;
+    dateFilter.appendChild(opt);
   });
 
-  const dateFilter = document.getElementById('dateFilter');
-  [...dateSet].sort((a, b) => new Date(b) - new Date(a)).forEach(date => {
-    const option = document.createElement('option');
-    option.value = date;
-    option.textContent = date;
-    dateFilter.appendChild(option);
-  });
-
-  drawFilter.addEventListener('change', applyFilters);
-  dateFilter.addEventListener('change', applyFilters);
-  document.getElementById('bonusToggle').addEventListener('change', () => {
-    updateHotCold(currentFiltered);
-    renderAllDrawCounts(currentFiltered);
-  });
-  document.getElementById('hotCount').addEventListener('change', () => updateHotCold(currentFiltered));
+  document.getElementById("drawFilter").onchange = applyFilters;
+  document.getElementById("dateFilter").onchange = applyFilters;
+  document.getElementById("bonusToggle").onchange = applyFilters;
+  document.getElementById("hotCount").onchange = applyFilters;
 }
 
 function applyFilters() {
-  const draw = document.getElementById('drawFilter').value;
-  const date = document.getElementById('dateFilter').value;
+  const draw = document.getElementById("drawFilter").value;
+  const date = document.getElementById("dateFilter").value;
 
-  let filtered = allData;
+  let filtered = [...allData];
+  if (draw !== "all") filtered = filtered.filter(d => d.draw_number === draw);
+  if (date !== "all") filtered = filtered.filter(d => d.date === date);
 
-  if (draw !== "all") {
-    filtered = filtered.filter(r => r.draw_number === draw);
-  }
-
-  if (date !== "all") {
-    filtered = filtered.filter(r => r.date === date);
-  }
-
-  currentFiltered = filtered;
   renderTable(filtered);
-  updateHotCold(filtered);
+  renderHotCold(filtered);
   renderAllDrawCounts(filtered);
 }
 
 function renderTable(data) {
-  const tbody = document.querySelector('#totoTable tbody');
+  const tbody = document.querySelector("#totoTable tbody");
   tbody.innerHTML = "";
 
-  data.forEach((result, index) => {
-    const prizeTableId = `prizes-${index}`;
-    const row = document.createElement('tr');
+  data.forEach(draw => {
+    const row = document.createElement("tr");
 
-    row.innerHTML = `
-      <td>${result.date}</td>
-      <td>${result.draw_number}</td>
-      <td>${result.winning_numbers.join(', ')}</td>
-      <td>${result.additional_number}</td>
-      <td>
-        <span class="prize-toggle" onclick="togglePrize('${prizeTableId}')">Show</span>
-        <table class="prize-table" id="${prizeTableId}">
-          <thead>
-            <tr><th>Group</th><th>Amount</th><th>Winners</th></tr>
-          </thead>
-          <tbody>
-            ${result.group_prizes?.map(p => `
-              <tr>
-                <td>${p.group}</td>
-                <td>${p.amount}</td>
-                <td>${p.shares}</td>
-              </tr>
-            `).join('') || "<tr><td colspan='3'>No data</td></tr>"}
-          </tbody>
-        </table>
-      </td>
-    `;
+    const tdDate = `<td>${draw.date}</td>`;
+    const tdDraw = `<td>${draw.draw_number}</td>`;
+    const tdWin = `<td>${draw.winning_numbers.join(", ")}</td>`;
+    const tdBonus = `<td>${draw.additional_number}</td>`;
+    const tdPrizes = `<td><span class="prize-toggle" onclick="togglePrize('${draw.draw_number}')">Show</span>
+      <table class="prize-table" id="prize-${draw.draw_number}">
+        <thead><tr><th>Group</th><th>Amount</th><th>Winners</th></tr></thead>
+        <tbody>
+          ${draw.group_prizes.map(p => `<tr><td>${p.group}</td><td>${p.amount}</td><td>${p.shares}</td></tr>`).join("")}
+        </tbody>
+      </table>
+    </td>`;
 
+    row.innerHTML = tdDate + tdDraw + tdWin + tdBonus + tdPrizes;
     tbody.appendChild(row);
   });
 }
 
-function togglePrize(id) {
-  const table = document.getElementById(id);
-  table.style.display = (table.style.display === "table") ? "none" : "table";
+function togglePrize(drawNumber) {
+  const table = document.getElementById(`prize-${drawNumber}`);
+  table.style.display = table.style.display === "none" ? "table" : "none";
 }
 
-function generateToto() {
-  const numbers = new Set();
-  while (numbers.size < 6) {
-    numbers.add(Math.floor(Math.random() * 49) + 1);
-  }
-  const sorted = [...numbers].sort((a, b) => a - b);
-  document.getElementById('totoGenOutput').textContent =
-    "Your TOTO Numbers: " + sorted.join(', ');
-}
+function renderHotCold(data) {
+  const freq = {};
+  for (let i = 1; i <= 49; i++) freq[i] = 0;
 
-function updateHotCold(data) {
-  const includeBonus = document.getElementById('bonusToggle').value === "yes";
-  const hotCountSetting = parseInt(document.getElementById('hotCount').value);
-
-  const frequency = {};
-  const appearances = {};
-
-  for (let i = 1; i <= 49; i++) {
-    frequency[i] = 0;
-    appearances[i] = [];
-  }
+  const includeBonus = document.getElementById("bonusToggle").value === "yes";
 
   data.forEach(draw => {
-    draw.winning_numbers.forEach(num => {
-      const n = parseInt(num, 10);
-      if (!isNaN(n)) {
-        frequency[n]++;
-        appearances[n].push(draw.date);
-      }
-    });
-    if (includeBonus) {
-      const bonus = parseInt(draw.additional_number, 10);
-      if (!isNaN(bonus)) {
-        frequency[bonus]++;
-        appearances[bonus].push(draw.date);
-      }
-    }
+    draw.winning_numbers.forEach(num => freq[parseInt(num)]++);
+    if (includeBonus) freq[parseInt(draw.additional_number)]++;
   });
 
-  const entries = Object.entries(frequency)
-    .map(([num, count]) => ({
-      number: num,
-      count: count,
-      dates: appearances[num]
-    }))
-    .filter(x => x.count > 0);
+  const count = parseInt(document.getElementById("hotCount").value, 10);
+  const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+  const hot = sorted.slice(0, count);
+  const cold = sorted.slice().reverse().slice(0, 10);
 
-  const sortedDesc = [...entries].sort((a, b) => b.count - a.count);
-  const sortedAsc = [...entries].sort((a, b) => a.count - b.count);
-  const bottomCount = sortedAsc[0]?.count || 0;
+  const hotDiv = document.getElementById("hotNumbers");
+  const coldDiv = document.getElementById("coldNumbers");
+  hotDiv.innerHTML = "";
+  coldDiv.innerHTML = "";
 
-  const hot = sortedDesc.slice(0, hotCountSetting);
-  const cold = sortedAsc.filter(x =>
-    x.count === bottomCount && !hot.find(h => h.number === x.number)
-  );
+  document.getElementById("drawCount").textContent = `Results based on ${data.length} draw(s)`;
 
-  const format = (list, type) =>
-    list.map(e =>
-      `<span class="pill ${type}">
-        <div>${e.count} draw${e.count > 1 ? "s" : ""}</div>
-        <div>"${e.number}"</div>
-        <span class="tooltip">${e.dates.join('\n')}</span>
-      </span>`
-    ).join('');
+  hot.forEach(([num, c]) => {
+    const div = document.createElement("div");
+    div.className = "pill hot";
+    div.textContent = `${c} draws "${num}"`;
+    hotDiv.appendChild(div);
+  });
 
-  document.getElementById('hotNumbers').innerHTML = format(hot, "hot");
-  document.getElementById('coldNumbers').innerHTML = format(cold, "cold");
-  document.getElementById('drawCount').textContent = `Results based on ${data.length} draw(s)`;
+  cold.forEach(([num, c]) => {
+    const div = document.createElement("div");
+    div.className = "pill cold";
+    div.textContent = `${c} draw${c === 1 ? "" : "s"} "${num}"`;
+    coldDiv.appendChild(div);
+  });
+}
+
+function renderAllDrawCounts(data) {
+  const tbody = document.querySelector("#allDrawTable tbody");
+  tbody.innerHTML = "";
+
+  const freq = {};
+  for (let i = 1; i <= 49; i++) freq[i] = 0;
+
+  const includeBonus = document.getElementById("bonusToggle").value === "yes";
+
+  data.forEach(draw => {
+    draw.winning_numbers.forEach(num => freq[parseInt(num)]++);
+    if (includeBonus) freq[parseInt(draw.additional_number)]++;
+  });
+
+  for (let i = 1; i <= 49; i++) {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${i}</td><td>${freq[i]}</td>`;
+    tbody.appendChild(row);
+  }
 }
 
 function toggleAllDraws() {
@@ -185,30 +142,16 @@ function toggleAllDraws() {
   section.classList.toggle("hidden");
 }
 
-function renderAllDrawCounts(data) {
-  const container = document.getElementById("allDrawList");
-  container.innerHTML = "";
-
-  const freq = {};
-  for (let i = 1; i <= 49; i++) freq[i] = 0;
-
-  const includeBonus = document.getElementById('bonusToggle').value === "yes";
-
-  data.forEach(draw => {
-    draw.winning_numbers.forEach(num => {
-      const n = parseInt(num, 10);
-      if (!isNaN(n)) freq[n]++;
-    });
-    if (includeBonus) {
-      const bonus = parseInt(draw.additional_number, 10);
-      if (!isNaN(bonus)) freq[bonus]++;
-    }
-  });
-
-  for (let i = 1; i <= 49; i++) {
-    const box = document.createElement("div");
-    box.className = "draw-panel";
-    box.textContent = `${i} → ${freq[i]} time${freq[i] !== 1 ? "s" : ""}`;
-    container.appendChild(box);
+/* Quick Pick */
+function generateToto() {
+  const nums = new Set();
+  while (nums.size < 6) {
+    nums.add(Math.floor(Math.random() * 49) + 1);
   }
+  document.getElementById("totoGenOutput").textContent = [...nums].sort((a, b) => a - b).join(", ");
 }
+
+/* Dark Mode Toggle */
+document.getElementById("darkModeToggle").addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+});
