@@ -72,16 +72,42 @@ function applyFilters() {
 function renderTable(data) {
   const tbody = document.querySelector('#totoTable tbody');
   tbody.innerHTML = "";
-  data.forEach(result => {
+
+  data.forEach((result, index) => {
+    const prizeTableId = `prizes-${index}`;
     const row = document.createElement('tr');
+
     row.innerHTML = `
       <td>${result.date}</td>
       <td>${result.draw_number}</td>
       <td>${result.winning_numbers.join(', ')}</td>
       <td>${result.additional_number}</td>
+      <td>
+        <span class="prize-toggle" onclick="togglePrize('${prizeTableId}')">Show</span>
+        <table class="prize-table" id="${prizeTableId}">
+          <thead>
+            <tr><th>Group</th><th>Amount</th><th>Winners</th></tr>
+          </thead>
+          <tbody>
+            ${result.group_prizes?.map(p => `
+              <tr>
+                <td>${p.group}</td>
+                <td>${p.amount}</td>
+                <td>${p.shares}</td>
+              </tr>
+            `).join('') || "<tr><td colspan='3'>No data</td></tr>"}
+          </tbody>
+        </table>
+      </td>
     `;
+
     tbody.appendChild(row);
   });
+}
+
+function togglePrize(id) {
+  const table = document.getElementById(id);
+  table.style.display = (table.style.display === "table") ? "none" : "table";
 }
 
 function generateToto() {
