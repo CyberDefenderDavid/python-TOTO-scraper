@@ -139,7 +139,7 @@
   <div class="section toggle-section">
     <span class="toggle-btn" onclick="toggleAllDraws()">Show All Numbers Based on Draw</span>
     <div id="allDraws" class="hidden">
-      <ul id="allDrawList"></ul>
+      <ul id="allDrawList" style="column-count: 3;"></ul>
     </div>
   </div>
 
@@ -161,7 +161,7 @@
         renderTable(data);
         currentFiltered = data;
         updateHotCold(data);
-        renderAllDraws(data);
+        renderAllDrawCounts(data);
       })
       .catch(error => {
         console.error("Error loading TOTO results:", error);
@@ -194,7 +194,10 @@
 
       drawFilter.addEventListener('change', applyFilters);
       dateFilter.addEventListener('change', applyFilters);
-      document.getElementById('bonusToggle').addEventListener('change', () => updateHotCold(currentFiltered));
+      document.getElementById('bonusToggle').addEventListener('change', () => {
+        updateHotCold(currentFiltered);
+        renderAllDrawCounts(currentFiltered);
+      });
       document.getElementById('hotCount').addEventListener('change', () => updateHotCold(currentFiltered));
     }
 
@@ -215,7 +218,7 @@
       currentFiltered = filtered;
       renderTable(filtered);
       updateHotCold(filtered);
-      renderAllDraws(filtered);
+      renderAllDrawCounts(filtered);
     }
 
     function renderTable(data) {
@@ -282,10 +285,9 @@
 
       const sortedDesc = [...entries].sort((a, b) => b.count - a.count);
       const sortedAsc = [...entries].sort((a, b) => a.count - b.count);
-      const avgCount = data.length / 49;
+      const bottomCount = sortedAsc[0]?.count || 0;
 
       const hot = sortedDesc.slice(0, hotCountSetting);
-      const bottomCount = sortedAsc[0]?.count || 0;
       const cold = sortedAsc.filter(x =>
         x.count === bottomCount && !hot.find(h => h.number === x.number)
       );
@@ -309,14 +311,31 @@
       section.classList.toggle("hidden");
     }
 
-    function renderAllDraws(data) {
+    function renderAllDrawCounts(data) {
       const ul = document.getElementById("allDrawList");
       ul.innerHTML = "";
+
+      const freq = {};
+      for (let i = 1; i <= 49; i++) freq[i] = 0;
+
+      const includeBonus = document.getElementById('bonusToggle').value === "yes";
+
       data.forEach(draw => {
-        const li = document.createElement("li");
-        li.textContent = `${draw.date} — Draw ${draw.draw_number} → ${draw.winning_numbers.join(', ')} + ${draw.additional_number}`;
-        ul.appendChild(li);
+        draw.winning_numbers.forEach(num => {
+          const n = parseInt(num, 10);
+          if (!isNaN(n)) freq[n]++;
+        });
+        if (includeBonus) {
+          const bonus = parseInt(draw.additional_number, 10);
+          if (!isNaN(bonus)) freq[bonus]++;
+        }
       });
+
+      for (let i = 1; i <= 49; i++) {
+        const li = document.createElement("li");
+        li.textContent = `${i} → ${freq[i]} time${freq[i] !== 1 ? "s" : ""}`;
+        ul.appendChild(li);
+      }
     }
   </script>
 </body>
