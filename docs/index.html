@@ -11,8 +11,9 @@
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     th, td { padding: 0.6rem; border: 1px solid #ccc; text-align: center; }
     th { background-color: #f0f0f0; }
-    #totoGenOutput { font-size: 1.3rem; margin-top: 1rem; color: #444; }
     .section { margin-top: 2.5rem; }
+    .list-inline li { margin: 0.4rem 0; font-size: 1.1rem; }
+    #totoGenOutput { font-size: 1.3rem; margin-top: 1rem; color: #444; }
   </style>
 </head>
 <body>
@@ -49,6 +50,14 @@
     <p id="totoGenOutput"></p>
   </div>
 
+  <div class="section">
+    <h2>🔥 Hot Numbers (Most Drawn)</h2>
+    <ul id="hotNumbers" class="list-inline"></ul>
+
+    <h2>❄️ Cold Numbers (Least Drawn)</h2>
+    <ul id="coldNumbers" class="list-inline"></ul>
+  </div>
+
   <script>
     let allData = [];
 
@@ -58,6 +67,7 @@
         allData = data;
         populateDropdowns(data);
         renderTable(data);
+        updateHotCold(data);
       })
       .catch(error => {
         console.error("Error loading TOTO results:", error);
@@ -107,6 +117,7 @@
       }
 
       renderTable(filtered);
+      updateHotCold(filtered);
     }
 
     function renderTable(data) {
@@ -136,6 +147,37 @@
       const sorted = [...numbers].sort((a, b) => a - b);
       document.getElementById('totoGenOutput').textContent =
         "Your TOTO Numbers: " + sorted.join(', ');
+    }
+
+    function updateHotCold(data) {
+      const frequency = {};
+
+      for (let i = 1; i <= 49; i++) {
+        frequency[i] = 0;
+      }
+
+      data.forEach(draw => {
+        draw.winning_numbers.forEach(num => {
+          const n = parseInt(num, 10);
+          if (!isNaN(n)) frequency[n]++;
+        });
+        // To include bonus numbers in the stats, uncomment:
+        // const bonus = parseInt(draw.additional_number, 10);
+        // if (!isNaN(bonus)) frequency[bonus]++;
+      });
+
+      const sorted = Object.entries(frequency)
+        .map(([num, count]) => ({ number: num, count: count }))
+        .sort((a, b) => b.count - a.count);
+
+      const hotList = sorted.filter(x => x.count > 0).slice(0, 10);
+      const coldList = sorted.slice().reverse().filter(x => x.count > 0).slice(0, 10);
+
+      const formatList = list =>
+        list.map((entry, i) => `<li>#${i + 1}: ${entry.number} → ${entry.count} draw(s)</li>`).join('');
+
+      document.getElementById('hotNumbers').innerHTML = formatList(hotList);
+      document.getElementById('coldNumbers').innerHTML = formatList(coldList);
     }
   </script>
 
