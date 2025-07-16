@@ -20,7 +20,7 @@ def fetch_toto_results():
 
         date = cols[0].get_text(strip=True)
         draw_number = cols[1].get_text(strip=True)
-        winning_numbers = [n.strip() for n in cols[2].get_text(strip=True).split(",")]
+        winning_numbers = cols[2].get_text(strip=True).split()
         additional_number = cols[3].get_text(strip=True)
 
         results.append({
