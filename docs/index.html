@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Singapore Pools TOTO Results</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    h1 { color: #2e7d32; }
+    label { margin-right: 0.5rem; }
+    select, input[type="date"] { margin-right: 1rem; padding: 0.3rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 0.6rem; border: 1px solid #ccc; text-align: center; }
+    th { background-color: #f0f0f0; }
+  </style>
+</head>
+<body>
+
+  <h1>TOTO Results</h1>
+
+  <div>
+    <label for="drawFilter">Filter by Draw Number:</label>
+    <select id="drawFilter">
+      <option value="all">All</option>
+    </select>
+
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDate">
+
+    <label for="endDate">End Date:</label>
+    <input type="date" id="endDate">
+
+    <button onclick="applyFilters()">Apply Filters</button>
+  </div>
+
+  <table id="totoTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Draw Number</th>
+        <th>Winning Numbers</th>
+        <th>Additional Number</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let allData = [];
+
+    fetch('toto_result.json')
+      .then(response => response.json())
+      .then(data => {
+        allData = data;
+        populateDropdown(data);
+        renderTable(data);
+      })
+      .catch(error => {
+        console.error("Error loading TOTO results:", error);
+      });
+
+    function populateDropdown(data) {
+      const drawSet = new Set(data.map(r => r.draw_number));
+      const drawFilter = document.getElementById('drawFilter');
+      [...drawSet].sort().reverse().forEach(draw => {
+        const option = document.createElement('option');
+        option.value = draw;
+        option.textContent = draw;
+        drawFilter.appendChild(option);
+      });
+    }
+
+    function applyFilters() {
+      const draw = document.getElementById('drawFilter').value;
+      const start = document.getElementById('startDate').value;
+      const end = document.getElementById('endDate').value;
+
+      let filtered = allData;
+
+      if (draw !== "all") {
+        filtered = filtered.filter(r => r.draw_number === draw);
+      }
+
+      if (start) {
+        filtered = filtered.filter(r => new Date(r.date) >= new Date(start));
+      }
+
+      if (end) {
+        filtered = filtered.filter(r => new Date(r.date) <= new Date(end));
+      }
+
+      renderTable(filtered);
+    }
+
+    function renderTable(data) {
+      const tbody = document.querySelector('#totoTable tbody');
+      tbody.innerHTML = "";
+      data.forEach(result => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${result.date}</td>
+          <td>${result.draw_number}</td>
+          <td>${result.winning_numbers.join(', ')}</td>
+          <td>${result.additional_number}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+  </script>
+
+</body>
+</html>
