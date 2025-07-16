@@ -1,8 +1,9 @@
+/* Base styles */
 body {
   font-family: sans-serif;
   margin: 2rem;
   background-color: #ffffff;
-  color: #000;
+  color: #000000;
 }
 
 h1 {
@@ -114,9 +115,9 @@ th {
 
 .all-draw-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 10px;
-  padding-top: 0.5rem;
+  padding-top: 1rem;
 }
 
 .draw-panel {
@@ -156,7 +157,7 @@ th {
   text-decoration: underline;
 }
 
-/* Dark mode support */
+/* Dark Mode */
 @media (prefers-color-scheme: dark) {
   body {
     background-color: #121212;
@@ -165,7 +166,7 @@ th {
 
   th {
     background-color: #1e1e1e;
-    color: #fff;
+    color: #ffffff;
   }
 
   td {
@@ -185,8 +186,8 @@ th {
   }
 
   .draw-panel {
-    background-color: #1e1e1e;
-    border-color: #444;
+    background-color: #222;
+    border-color: #555;
     color: #eee;
   }
 
@@ -196,5 +197,9 @@ th {
 
   .prize-table td {
     background-color: #222;
+  }
+
+  .toggle-btn {
+    color: #64b5f6;
   }
 }
