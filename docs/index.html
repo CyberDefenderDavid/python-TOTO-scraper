@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Singapore Pools TOTO Results</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <button id="darkModeToggle">🌙 Toggle Dark Mode</button>
+  <button class="dark-toggle" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
 
   <h1>TOTO Results</h1>
 
@@ -55,6 +55,7 @@
       <option value="6" selected>6</option>
       <option value="7">7</option>
       <option value="8">8</option>
+      <option value="all">All</option>
     </select>
 
     <p id="drawCount"></p>
@@ -67,23 +68,23 @@
   <div class="section toggle-section">
     <span class="toggle-btn" onclick="toggleAllDraws()">Show All Numbers Based on Draw</span>
     <div id="allDraws" class="hidden">
-      <table id="allDrawTable">
+      <table class="all-draw-table">
         <thead>
           <tr>
             <th>Number</th>
             <th>Times Drawn</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody id="allDrawList"></tbody>
       </table>
     </div>
   </div>
 
   <footer style="font-size: 0.9em; color: #666; text-align: center; margin-top: 2em;">
     <p>
-      This site is an <strong>unofficial viewer</strong> of Singapore TOTO results.<br />
-      Data is sourced from <a href="https://www.singaporepools.com.sg" target="_blank" rel="noopener noreferrer">Singapore Pools</a> and refreshed daily.<br />
-      We are <strong>not affiliated</strong> with or endorsed by Singapore Pools.<br />
+      This site is an <strong>unofficial viewer</strong> of Singapore TOTO results.<br>
+      Data is sourced from <a href="https://www.singaporepools.com.sg" target="_blank" rel="noopener noreferrer">Singapore Pools</a> and refreshed daily.<br>
+      We are <strong>not affiliated</strong> with or endorsed by Singapore Pools.<br>
       This project is for <strong>learning GitHub Actions and workflow automation</strong>.
     </p>
   </footer>
