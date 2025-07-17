@@ -98,19 +98,39 @@ button {
   display: none;
 }
 
+/* Improved table readability */
 .all-draw-table {
   width: 100%;
-  margin-top: 1em;
   border-collapse: collapse;
+  margin-top: 1em;
+  font-size: 0.95em;
 }
 
-.all-draw-table th, .all-draw-table td {
-  padding: 0.4em;
+.all-draw-table th,
+.all-draw-table td {
+  padding: 0.6em;
   border: 1px solid #ccc;
+  text-align: right;
 }
 
-.dark-mode .all-draw-table th, .dark-mode .all-draw-table td {
+.all-draw-table tbody tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+.dark-mode .all-draw-table tbody tr:nth-child(odd) {
+  background-color: #1a1a1a;
+}
+
+.dark-mode .all-draw-table th,
+.dark-mode .all-draw-table td {
   border-color: #555;
+}
+
+#allDraws {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 0.5em;
+  margin-top: 1em;
 }
 
 footer a {
