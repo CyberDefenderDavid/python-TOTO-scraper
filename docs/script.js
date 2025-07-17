@@ -31,9 +31,6 @@ function populateFilters(data) {
 
   drawFilter.addEventListener("change", applyFilters);
   dateFilter.addEventListener("change", applyFilters);
-  document.getElementById("bonusToggle").addEventListener("change", () => renderStats(allData));
-  document.getElementById("hotCount").addEventListener("change", () => renderStats(allData));
-  document.getElementById("coldCount").addEventListener("change", () => renderStats(allData));
 }
 
 function applyFilters() {
@@ -85,13 +82,20 @@ function togglePrize(link) {
   link.textContent = row.classList.contains("hidden") ? "Show" : "Hide";
 }
 
+function generateToto() {
+  const nums = new Set();
+  while (nums.size < 6) nums.add(Math.floor(Math.random() * 49) + 1);
+  document.getElementById("totoGenOutput").textContent = [...nums].sort((a, b) => a - b).join(", ");
+}
+
 function renderStats(data) {
   const includeAdd = document.getElementById("bonusToggle").value === "yes";
-  let hotCount = document.getElementById("hotCount").value;
-  let coldCount = document.getElementById("coldCount").value;
-  hotCount = hotCount === "all" ? 49 : parseInt(hotCount, 10);
-  coldCount = coldCount === "all" ? 49 : parseInt(coldCount, 10);
 
+  // Get hot/cold counts
+  const hotCount = parseInt(document.getElementById("hotCount").value, 10);
+  const coldCount = parseInt(document.getElementById("coldCount").value, 10);
+
+  // Initialize counter for 1–49
   const countMap = {};
   for (let i = 1; i <= 49; i++) countMap[i] = 0;
 
@@ -104,10 +108,15 @@ function renderStats(data) {
   const sortedHot = [...allEntries].sort((a, b) => b[1] - a[1]).slice(0, hotCount);
   const sortedCold = [...allEntries].sort((a, b) => a[1] - b[1]).slice(0, coldCount);
 
+  // Update hot and cold numbers
   const hotDiv = document.getElementById("hotNumbers");
   const coldDiv = document.getElementById("coldNumbers");
-  hotDiv.innerHTML = sortedHot.map(([num, cnt]) => `<span class="pill hot">${cnt} draws "${num}"</span>`).join("");
-  coldDiv.innerHTML = sortedCold.map(([num, cnt]) => `<span class="pill cold">${cnt} draws "${num}"</span>`).join("");
+
+  hotDiv.innerHTML = sortedHot.map(([num, cnt]) =>
+    `<span class="pill hot">${cnt} draw${cnt !== 1 ? "s" : ""} "${num}"</span>`).join("");
+
+  coldDiv.innerHTML = sortedCold.map(([num, cnt]) =>
+    `<span class="pill cold">${cnt} draw${cnt !== 1 ? "s" : ""} "${num}"</span>`).join("");
 
   document.getElementById("drawCount").textContent = `Results based on ${data.length} draw(s)`;
 
@@ -116,22 +125,17 @@ function renderStats(data) {
 
 function renderAllDrawList(countMap) {
   const container = document.getElementById("allDrawList");
-  if (!container) return;
-  container.innerHTML = Object.entries(countMap).map(
-    ([n, c]) => `<tr><td>${n}</td><td>${c}</td></tr>`
-  ).join("");
+  container.innerHTML = Object.entries(countMap).map(([n, c]) =>
+    `<tr><td>${n}</td><td>${c}</td></tr>`).join("");
 }
 
 function toggleAllDraws() {
   document.getElementById("allDraws").classList.toggle("hidden");
 }
 
-function generateToto() {
-  const nums = new Set();
-  while (nums.size < 6) nums.add(Math.floor(Math.random() * 49) + 1);
-  document.getElementById("totoGenOutput").textContent = [...nums].sort((a, b) => a - b).join(", ");
-}
-
+document.getElementById("bonusToggle").addEventListener("change", () => renderStats(allData));
+document.getElementById("hotCount").addEventListener("change", () => renderStats(allData));
+document.getElementById("coldCount").addEventListener("change", () => renderStats(allData));
 document.getElementById("darkToggle").addEventListener("click", () => {
   document.body.classList.toggle("dark-mode");
 });
