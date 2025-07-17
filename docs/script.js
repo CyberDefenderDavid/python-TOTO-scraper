@@ -1,6 +1,6 @@
 let allData = [];
 
-fetch("docs/toto_result.json")
+fetch("toto_result.json")
   .then(res => res.json())
   .then(data => {
     allData = data;
