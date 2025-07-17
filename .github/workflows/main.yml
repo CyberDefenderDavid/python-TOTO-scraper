@@ -1,12 +1,16 @@
 name: Update TOTO Results
 
 on:
-  schedule:
-    - cron: '30 10 * * *'  # 6:30pm SGT
-    - cron: '45 10 * * *'  # 6:45pm SGT
-    - cron: '15 11 * * *'  # 7:15pm SGT
-    - cron: '0  12 * * *'  # 8:00pm SGT
-    - cron: '0  13 * * *'  # 9:00pm SGT
+    schedule:
+  - cron: '30 10 * * *'  # 6:30pm SGT
+  - cron: '45 10 * * *'  # 6:45pm SGT
+  - cron: '15 11 * * *'  # 7:15pm SGT
+  - cron: '0  12 * * *'  # 8:00pm SGT
+  - cron: '0  13 * * *'  # 9:00pm SGT
+  - cron: '0  14 * * *'  # 10:00pm SGT
+  - cron: '0  15 * * *'  # 11:00pm SGT
+  - cron: '23 23 * * *'  # 7:00am SGT next day
+
   workflow_dispatch:
 
 jobs:
