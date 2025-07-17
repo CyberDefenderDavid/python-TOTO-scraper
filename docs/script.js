@@ -117,7 +117,11 @@ function renderHotCold(data) {
 }
 
 function renderAllDrawCounts(data) {
-  const tbody = document.querySelector("#allDrawTable tbody");
+  const table = document.getElementById("allDrawTable");
+  if (!table) return;
+
+  const tbody = table.querySelector("tbody");
+  if (!tbody) return;
   tbody.innerHTML = "";
 
   const freq = {};
@@ -139,10 +143,10 @@ function renderAllDrawCounts(data) {
 
 function toggleAllDraws() {
   const section = document.getElementById("allDraws");
-  section.classList.toggle("hidden");
+  const willShow = section.classList.toggle("hidden");
+  if (!willShow) renderAllDrawCounts(allData); // re-render on show
 }
 
-/* Quick Pick */
 function generateToto() {
   const nums = new Set();
   while (nums.size < 6) {
@@ -151,7 +155,6 @@ function generateToto() {
   document.getElementById("totoGenOutput").textContent = [...nums].sort((a, b) => a - b).join(", ");
 }
 
-/* Dark Mode Toggle */
 document.getElementById("darkModeToggle").addEventListener("click", () => {
   document.body.classList.toggle("dark");
 });
