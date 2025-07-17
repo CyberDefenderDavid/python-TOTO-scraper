@@ -1,7 +1,7 @@
 name: Update TOTO Results
 
 on:
-    schedule:
+  schedule:
   - cron: '30 10 * * *'  # 6:30pm SGT
   - cron: '45 10 * * *'  # 6:45pm SGT
   - cron: '15 11 * * *'  # 7:15pm SGT
