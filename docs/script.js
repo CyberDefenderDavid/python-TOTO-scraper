@@ -5,156 +5,134 @@ fetch("toto_result.json")
   .then(data => {
     allData = data;
     populateFilters(data);
-    applyFilters();
-  });
+    renderTable(data);
+    renderStats(data);
+  })
+  .catch(err => console.error("Failed to load JSON:", err));
 
 function populateFilters(data) {
-  const drawSet = new Set(data.map(d => d.draw_number));
-  const dateSet = new Set(data.map(d => d.date));
-
   const drawFilter = document.getElementById("drawFilter");
   const dateFilter = document.getElementById("dateFilter");
+  const draws = [...new Set(data.map(r => r.draw_number))].sort((a, b) => b - a);
+  const dates = [...new Set(data.map(r => r.date))].sort((a, b) => new Date(b) - new Date(a));
 
-  [...drawSet].sort((a, b) => b - a).forEach(draw => {
+  for (const d of draws) {
     const opt = document.createElement("option");
-    opt.value = draw;
-    opt.textContent = draw;
+    opt.value = d;
+    opt.textContent = d;
     drawFilter.appendChild(opt);
-  });
-
-  [...dateSet].sort().forEach(date => {
+  }
+  for (const dt of dates) {
     const opt = document.createElement("option");
-    opt.value = date;
-    opt.textContent = date;
+    opt.value = dt;
+    opt.textContent = dt;
     dateFilter.appendChild(opt);
-  });
+  }
 
-  document.getElementById("drawFilter").onchange = applyFilters;
-  document.getElementById("dateFilter").onchange = applyFilters;
-  document.getElementById("bonusToggle").onchange = applyFilters;
-  document.getElementById("hotCount").onchange = applyFilters;
+  drawFilter.addEventListener("change", applyFilters);
+  dateFilter.addEventListener("change", applyFilters);
 }
 
 function applyFilters() {
-  const draw = document.getElementById("drawFilter").value;
-  const date = document.getElementById("dateFilter").value;
-
-  let filtered = [...allData];
-  if (draw !== "all") filtered = filtered.filter(d => d.draw_number === draw);
-  if (date !== "all") filtered = filtered.filter(d => d.date === date);
-
+  const drawVal = document.getElementById("drawFilter").value;
+  const dateVal = document.getElementById("dateFilter").value;
+  let filtered = allData;
+  if (drawVal !== "all") filtered = filtered.filter(d => d.draw_number === drawVal);
+  if (dateVal !== "all") filtered = filtered.filter(d => d.date === dateVal);
   renderTable(filtered);
-  renderHotCold(filtered);
-  renderAllDrawCounts(filtered);
 }
 
 function renderTable(data) {
   const tbody = document.querySelector("#totoTable tbody");
   tbody.innerHTML = "";
-
   data.forEach(draw => {
-    const row = document.createElement("tr");
-
-    const tdDate = `<td>${draw.date}</td>`;
-    const tdDraw = `<td>${draw.draw_number}</td>`;
-    const tdWin = `<td>${draw.winning_numbers.join(", ")}</td>`;
-    const tdBonus = `<td>${draw.additional_number}</td>`;
-    const tdPrizes = `<td><span class="prize-toggle" onclick="togglePrize('${draw.draw_number}')">Show</span>
-      <table class="prize-table" id="prize-${draw.draw_number}">
-        <thead><tr><th>Group</th><th>Amount</th><th>Winners</th></tr></thead>
-        <tbody>
-          ${draw.group_prizes.map(p => `<tr><td>${p.group}</td><td>${p.amount}</td><td>${p.shares}</td></tr>`).join("")}
-        </tbody>
-      </table>
-    </td>`;
-
-    row.innerHTML = tdDate + tdDraw + tdWin + tdBonus + tdPrizes;
-    tbody.appendChild(row);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${draw.date}</td>
+      <td>${draw.draw_number}</td>
+      <td>${draw.winning_numbers.join(", ")}</td>
+      <td>${draw.additional_number}</td>
+      <td><a href="#" onclick="togglePrize(this)">Show</a></td>
+    `;
+    const prizeTr = document.createElement("tr");
+    prizeTr.classList.add("hidden");
+    prizeTr.innerHTML = `
+      <td colspan="5">
+        <table class="all-draw-table">
+          <thead><tr><th>Group</th><th>Amount</th><th>Winners</th></tr></thead>
+          <tbody>
+            ${draw.group_prizes.map(p => `
+              <tr>
+                <td>${p.group}</td>
+                <td>${p.amount}</td>
+                <td>${p.shares}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </td>`;
+    tbody.appendChild(tr);
+    tbody.appendChild(prizeTr);
   });
 }
 
-function togglePrize(drawNumber) {
-  const table = document.getElementById(`prize-${drawNumber}`);
-  table.style.display = table.style.display === "none" ? "table" : "none";
-}
-
-function renderHotCold(data) {
-  const freq = {};
-  for (let i = 1; i <= 49; i++) freq[i] = 0;
-
-  const includeBonus = document.getElementById("bonusToggle").value === "yes";
-
-  data.forEach(draw => {
-    draw.winning_numbers.forEach(num => freq[parseInt(num)]++);
-    if (includeBonus) freq[parseInt(draw.additional_number)]++;
-  });
-
-  const count = parseInt(document.getElementById("hotCount").value, 10);
-  const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
-  const hot = sorted.slice(0, count);
-  const cold = sorted.slice().reverse().slice(0, 10);
-
-  const hotDiv = document.getElementById("hotNumbers");
-  const coldDiv = document.getElementById("coldNumbers");
-  hotDiv.innerHTML = "";
-  coldDiv.innerHTML = "";
-
-  document.getElementById("drawCount").textContent = `Results based on ${data.length} draw(s)`;
-
-  hot.forEach(([num, c]) => {
-    const div = document.createElement("div");
-    div.className = "pill hot";
-    div.textContent = `${c} draws "${num}"`;
-    hotDiv.appendChild(div);
-  });
-
-  cold.forEach(([num, c]) => {
-    const div = document.createElement("div");
-    div.className = "pill cold";
-    div.textContent = `${c} draw${c === 1 ? "" : "s"} "${num}"`;
-    coldDiv.appendChild(div);
-  });
-}
-
-function renderAllDrawCounts(data) {
-  const table = document.getElementById("allDrawTable");
-  if (!table) return;
-
-  const tbody = table.querySelector("tbody");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  const freq = {};
-  for (let i = 1; i <= 49; i++) freq[i] = 0;
-
-  const includeBonus = document.getElementById("bonusToggle").value === "yes";
-
-  data.forEach(draw => {
-    draw.winning_numbers.forEach(num => freq[parseInt(num)]++);
-    if (includeBonus) freq[parseInt(draw.additional_number)]++;
-  });
-
-  for (let i = 1; i <= 49; i++) {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td>${i}</td><td>${freq[i]}</td>`;
-    tbody.appendChild(row);
-  }
-}
-
-function toggleAllDraws() {
-  const section = document.getElementById("allDraws");
-  const willShow = section.classList.toggle("hidden");
-  if (!willShow) renderAllDrawCounts(allData); // re-render on show
+function togglePrize(link) {
+  const row = link.closest("tr").nextSibling;
+  row.classList.toggle("hidden");
+  link.textContent = row.classList.contains("hidden") ? "Show" : "Hide";
 }
 
 function generateToto() {
   const nums = new Set();
-  while (nums.size < 6) {
-    nums.add(Math.floor(Math.random() * 49) + 1);
-  }
-  document.getElementById("totoGenOutput").textContent = [...nums].sort((a, b) => a - b).join(", ");
+  while (nums.size < 6) nums.add(Math.floor(Math.random() * 49) + 1);
+  document.getElementById("totoGenOutput").textContent = [...nums].sort((a,b)=>a-b).join(", ");
 }
 
-document.getElementById("darkModeToggle").addEventListener("click", () => {
-  document.body.classList.toggle("dark");
+function renderStats(data) {
+  const includeAdd = document.getElementById("bonusToggle").value === "yes";
+  const hotCount = parseInt(document.getElementById("hotCount").value, 10);
+  const coldCount = parseInt(document.getElementById("coldCount").value, 10);
+
+  const countMap = {};
+  for (let i = 1; i <= 49; i++) countMap[i] = 0;
+
+  data.forEach(d => {
+    d.winning_numbers.forEach(n => countMap[n]++);
+    if (includeAdd && d.additional_number) countMap[d.additional_number]++;
+  });
+
+  const allEntries = Object.entries(countMap);
+  const sortedHot = [...allEntries].sort((a,b) => b[1] - a[1]).slice(0, hotCount);
+  const sortedCold = [...allEntries].sort((a,b) => a[1] - b[1]).slice(0, coldCount);
+
+  const hotDiv = document.getElementById("hotNumbers");
+  const coldDiv = document.getElementById("coldNumbers");
+  hotDiv.innerHTML = sortedHot.map(([num, cnt]) => `<span class="pill hot">${cnt} draws "${num}"</span>`).join("");
+  coldDiv.innerHTML = sortedCold.map(([num, cnt]) => `<span class="pill cold">${cnt} draws "${num}"</span>`).join("");
+
+  document.getElementById("drawCount").textContent = `Results based on ${data.length} draw(s)`;
+
+  renderAllDrawList(countMap);
+}
+
+function renderAllDrawList(countMap) {
+  const container = document.getElementById("allDrawList");
+  container.innerHTML = `
+    <table class="all-draw-table">
+      <thead><tr><th>Number</th><th>Times Drawn</th></tr></thead>
+      <tbody>
+        ${Object.entries(countMap).map(([n,c]) => `<tr><td>${n}</td><td>${c}</td></tr>`).join("")}
+      </tbody>
+    </table>`;
+}
+
+document.getElementById("bonusToggle").addEventListener("change", () => renderStats(allData));
+document.getElementById("hotCount").addEventListener("change", () => renderStats(allData));
+document.getElementById("coldCount").addEventListener("change", () => renderStats(allData));
+
+function toggleAllDraws() {
+  document.getElementById("allDraws").classList.toggle("hidden");
+}
+
+document.getElementById("darkToggle").addEventListener("click", () => {
+  document.body.classList.toggle("dark-mode");
 });
