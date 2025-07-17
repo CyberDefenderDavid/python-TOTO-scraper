@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Singapore Pools TOTO Results</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <button class="dark-toggle" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+  <button class="dark-toggle" id="darkToggle">🌙 Toggle Dark Mode</button>
 
   <h1>TOTO Results</h1>
 
@@ -55,13 +55,20 @@
       <option value="6" selected>6</option>
       <option value="7">7</option>
       <option value="8">8</option>
-      <option value="all">All</option>
     </select>
 
     <p id="drawCount"></p>
     <div id="hotNumbers"></div>
 
     <h2 class="cold-title">❄️ Cold Numbers (Least Drawn)</h2>
+
+    <label for="coldCount">How many cold numbers to show:</label>
+    <select id="coldCount">
+      <option value="6" selected>6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+    </select>
+
     <div id="coldNumbers"></div>
   </div>
 
@@ -82,9 +89,9 @@
 
   <footer style="font-size: 0.9em; color: #666; text-align: center; margin-top: 2em;">
     <p>
-      This site is an <strong>unofficial viewer</strong> of Singapore TOTO results.<br>
-      Data is sourced from <a href="https://www.singaporepools.com.sg" target="_blank" rel="noopener noreferrer">Singapore Pools</a> and refreshed daily.<br>
-      We are <strong>not affiliated</strong> with or endorsed by Singapore Pools.<br>
+      This site is an <strong>unofficial viewer</strong> of Singapore TOTO results.<br />
+      Data is sourced from <a href="https://www.singaporepools.com.sg" target="_blank" rel="noopener noreferrer">Singapore Pools</a> and refreshed daily.<br />
+      We are <strong>not affiliated</strong> with or endorsed by Singapore Pools.<br />
       This project is for <strong>learning GitHub Actions and workflow automation</strong>.
     </p>
   </footer>
