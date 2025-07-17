@@ -31,6 +31,9 @@ function populateFilters(data) {
 
   drawFilter.addEventListener("change", applyFilters);
   dateFilter.addEventListener("change", applyFilters);
+  document.getElementById("bonusToggle").addEventListener("change", () => renderStats(allData));
+  document.getElementById("hotCount").addEventListener("change", () => renderStats(allData));
+  document.getElementById("coldCount").addEventListener("change", () => renderStats(allData));
 }
 
 function applyFilters() {
@@ -40,6 +43,7 @@ function applyFilters() {
   if (drawVal !== "all") filtered = filtered.filter(d => d.draw_number === drawVal);
   if (dateVal !== "all") filtered = filtered.filter(d => d.date === dateVal);
   renderTable(filtered);
+  renderStats(filtered);
 }
 
 function renderTable(data) {
@@ -81,16 +85,12 @@ function togglePrize(link) {
   link.textContent = row.classList.contains("hidden") ? "Show" : "Hide";
 }
 
-function generateToto() {
-  const nums = new Set();
-  while (nums.size < 6) nums.add(Math.floor(Math.random() * 49) + 1);
-  document.getElementById("totoGenOutput").textContent = [...nums].sort((a,b)=>a-b).join(", ");
-}
-
 function renderStats(data) {
   const includeAdd = document.getElementById("bonusToggle").value === "yes";
-  const hotCount = parseInt(document.getElementById("hotCount").value, 10);
-  const coldCount = parseInt(document.getElementById("coldCount").value, 10);
+  let hotCount = document.getElementById("hotCount").value;
+  let coldCount = document.getElementById("coldCount").value;
+  hotCount = hotCount === "all" ? 49 : parseInt(hotCount, 10);
+  coldCount = coldCount === "all" ? 49 : parseInt(coldCount, 10);
 
   const countMap = {};
   for (let i = 1; i <= 49; i++) countMap[i] = 0;
@@ -101,8 +101,8 @@ function renderStats(data) {
   });
 
   const allEntries = Object.entries(countMap);
-  const sortedHot = [...allEntries].sort((a,b) => b[1] - a[1]).slice(0, hotCount);
-  const sortedCold = [...allEntries].sort((a,b) => a[1] - b[1]).slice(0, coldCount);
+  const sortedHot = [...allEntries].sort((a, b) => b[1] - a[1]).slice(0, hotCount);
+  const sortedCold = [...allEntries].sort((a, b) => a[1] - b[1]).slice(0, coldCount);
 
   const hotDiv = document.getElementById("hotNumbers");
   const coldDiv = document.getElementById("coldNumbers");
@@ -116,21 +116,20 @@ function renderStats(data) {
 
 function renderAllDrawList(countMap) {
   const container = document.getElementById("allDrawList");
-  container.innerHTML = `
-    <table class="all-draw-table">
-      <thead><tr><th>Number</th><th>Times Drawn</th></tr></thead>
-      <tbody>
-        ${Object.entries(countMap).map(([n,c]) => `<tr><td>${n}</td><td>${c}</td></tr>`).join("")}
-      </tbody>
-    </table>`;
+  if (!container) return;
+  container.innerHTML = Object.entries(countMap).map(
+    ([n, c]) => `<tr><td>${n}</td><td>${c}</td></tr>`
+  ).join("");
 }
-
-document.getElementById("bonusToggle").addEventListener("change", () => renderStats(allData));
-document.getElementById("hotCount").addEventListener("change", () => renderStats(allData));
-document.getElementById("coldCount").addEventListener("change", () => renderStats(allData));
 
 function toggleAllDraws() {
   document.getElementById("allDraws").classList.toggle("hidden");
+}
+
+function generateToto() {
+  const nums = new Set();
+  while (nums.size < 6) nums.add(Math.floor(Math.random() * 49) + 1);
+  document.getElementById("totoGenOutput").textContent = [...nums].sort((a, b) => a - b).join(", ");
 }
 
 document.getElementById("darkToggle").addEventListener("click", () => {
